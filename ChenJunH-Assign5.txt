@@ -14,12 +14,11 @@ Answer: 100
 Query:
 SELECT DISTINCT volunteerName
 FROM volunteer
-WHERE (volunteerTelephone NOT LIKE '2%' OR volunteerTelephone IS NULL)
-AND volunteerName NOT LIKE '% Jones';
+WHERE volunteerTelephone IS NOT NULL
+  AND volunteerTelephone NOT LIKE '2%'
+  AND volunteerName NOT LIKE '% Jones';
 
 Answer:
-Harry Smith
-Joan Simmons
 Gene Lewin
 
 ================================================================================
@@ -228,5 +227,6 @@ Answer:
 4, 350
 10, 750
 5, 1420
+
 
 
