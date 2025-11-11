@@ -1,0 +1,232 @@
+1) How many containers of antibiotics are currently available?
+
+Query:
+SELECT quantityOnHand
+FROM item
+WHERE itemDescription = 'bottle of antibiotics';
+
+Answer: 100
+
+================================================================================
+
+2) Which volunteer(s), if any, have phone numbers that do not start with the number 2 and whose last name is not Jones. Query should retrieve names rather than ids.
+
+Query:
+SELECT DISTINCT volunteerName
+FROM volunteer
+WHERE (volunteerTelephone NOT LIKE '2%' OR volunteerTelephone IS NULL)
+AND volunteerName NOT LIKE '% Jones';
+
+Answer:
+Harry Smith
+Joan Simmons
+Gene Lewin
+
+================================================================================
+
+3) Which volunteer(s) are working on transporting tasks? Query should retrieve names rather than ids.
+
+Query:
+SELECT DISTINCT volunteerName
+FROM volunteer
+JOIN assignment USING (volunteerId)
+JOIN task USING (taskCode)
+JOIN task_type USING (taskTypeId)
+WHERE taskTypeName = 'transporting';
+
+Answer: George Brewer
+
+================================================================================
+
+4) Which task(s) have yet to be assigned to any volunteers (provide task descriptions, not the codes)?
+
+Query:
+SELECT taskDescription
+FROM task
+LEFT JOIN assignment USING (taskCode)
+WHERE assignment.volunteerId IS NULL;
+
+Answer:
+Prepare 100 food packages
+Take packages to the warehouse
+
+================================================================================
+
+5) Which type(s) of package contain some kind of bottle?
+
+Query:
+SELECT DISTINCT packageTypeName
+FROM package_type
+JOIN package USING (packageTypeId)
+JOIN package_contents USING (packageId)
+JOIN item USING (itemId)
+WHERE itemDescription LIKE '%bottle%';
+
+Answer:
+food and water
+
+================================================================================
+
+6) Which items, if any, are not in any packages? Answer should be item descriptions.
+
+Query:
+SELECT itemDescription
+FROM item
+LEFT JOIN package_contents USING (itemId)
+WHERE package_contents.packageId IS NULL;
+
+Answer:
+bottle of antibiotics
+bottle of aspirin
+flashlight
+pack of bandages
+
+================================================================================
+
+7) Which task(s) are assigned to volunteer(s) that live in New Jersey (NJ)? Answer should have the task description and not the task ids.
+
+Query:
+SELECT DISTINCT taskDescription
+FROM task
+JOIN assignment USING (taskCode)
+JOIN volunteer USING (volunteerId)
+WHERE volunteerAddress LIKE '%NJ%';
+
+Answer:
+Prepare 20 children's packages
+Prepare 100 water packages
+Prepare 5,000 packages   
+
+================================================================================
+
+8) Which volunteers began their assignments in the first half of 2021? Answer should have the volunteer names and not their ids.
+
+Query:
+SELECT DISTINCT volunteerName
+FROM volunteer
+JOIN assignment USING (volunteerId)
+WHERE startDateTime >= '2021-01-01'
+AND startDateTime < '2021-07-01';
+
+Answer:
+Joan Simmons
+Chris Jordan
+
+================================================================================
+
+9) Which volunteers have been assigned to tasks that include packing spam? Answer should have the volunteer names and not their ids.
+
+Query:
+SELECT DISTINCT volunteerName
+FROM volunteer
+JOIN assignment USING (volunteerId)
+JOIN task USING (taskCode)
+JOIN package USING (taskCode)
+JOIN package_contents USING (packageId)
+JOIN item USING (itemId)
+WHERE itemDescription = 'can of spam';
+
+Answer:
+Julie White
+Gerry Banks
+
+================================================================================
+
+10) Which item(s) (if any) have a total value of exactly $100 in one package? Answer should be item descriptions.
+
+Query:
+SELECT DISTINCT itemDescription
+FROM item
+JOIN package_contents USING (itemId)
+WHERE (itemValue * itemQuantity) = 100;
+
+Answer:
+Baby formula
+
+================================================================================
+
+11) How many volunteers are assigned to tasks with each different status? The answer should show each different status and the number of volunteers sorted from highest to lowest)
+
+Query:
+SELECT taskStatusName, COUNT(DISTINCT volunteerId)
+FROM task_status
+JOIN task USING (taskStatusId)
+JOIN assignment USING (taskCode)
+GROUP BY taskStatusName
+ORDER BY COUNT(DISTINCT volunteerId) DESC;
+
+Answer:
+open, 4
+closed, 3
+ongoing, 2
+pending, 1
+
+================================================================================
+
+12) Which task creates the heaviest set of packages and what is the weight? Show both the taskCode and the weight (You should be able to do this without using any sub-queries).
+
+Query:
+SELECT taskCode, SUM(packageWeight)
+FROM package
+GROUP BY taskCode
+ORDER BY SUM(packageWeight) DESC
+LIMIT 1;
+
+Answer: 106, 308
+
+================================================================================
+
+13) How many tasks are there that do not have a type of "packing"?
+
+Query:
+SELECT COUNT(*)
+FROM task
+JOIN task_type USING (taskTypeId)
+WHERE taskTypeName != 'packing';
+
+Answer: 3
+
+================================================================================
+
+14) Of those items that have been packed, which item (or items) were touched by fewer than 3 volunteers? Answer should be item descriptions.
+
+Query:
+SELECT itemDescription
+FROM item
+JOIN package_contents USING (itemId)
+JOIN package USING (packageId)
+JOIN task USING (taskCode)
+JOIN assignment USING (taskCode)
+GROUP BY itemDescription
+HAVING COUNT(DISTINCT volunteerId) < 3;
+
+Answer:
+can of spam
+dried fruit
+men's coat
+sleeping bag
+tent
+women's coat
+
+
+================================================================================
+
+15) Which packages have a total value of more than 100? Show the packageIds and their value sorted from lowest to highest.
+
+Query:
+SELECT packageId, SUM(itemValue * itemQuantity)
+FROM package
+JOIN package_contents USING (packageId)
+JOIN item USING (itemId)
+GROUP BY packageId
+HAVING SUM(itemValue * itemQuantity) > 100
+ORDER BY SUM(itemValue * itemQuantity);
+
+Answer:
+6, 150
+2，151
+4, 350
+10, 750
+5, 1420
+
+
